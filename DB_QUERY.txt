@@ -1,0 +1,151 @@
+DROP DATABASE db_drugvault;
+CREATE DATABASE db_drugvault;
+USE db_drugvault;
+
+CREATE TABLE ms_role (
+    id_role CHAR(36) PRIMARY KEY,
+    code_role VARCHAR(20) NOT NULL UNIQUE,
+    name_role VARCHAR(50) NOT NULL,
+    is_active ENUM('0', '1') NOT NULL DEFAULT '1',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP
+);
+
+CREATE TABLE ms_user (
+    id CHAR(36) PRIMARY KEY,
+    role_id CHAR(36) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    sandi VARCHAR(50),
+    avatar VARCHAR(255),
+    avatar_mimetype VARCHAR(50),
+    avatar_originalfile VARCHAR(255),
+    avatar_originalmimetype VARCHAR(50),
+    remember_token VARCHAR(100),
+    is_active ENUM('0', '1') NOT NULL DEFAULT '1',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES ms_role (id_role)
+);
+
+CREATE TABLE menu (
+    id_menu CHAR(36) PRIMARY KEY,
+    upid_menu VARCHAR(36) NOT NULL DEFAULT '0',
+    code_menu VARCHAR(15) NOT NULL UNIQUE,
+    name_menu VARCHAR(100) NOT NULL,
+    link_menu VARCHAR(255),
+    icon_menu VARCHAR(50),
+    action_menu MEDIUMTEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP
+);
+
+CREATE TABLE menu_auth (
+    id_menu_auth CHAR(36) PRIMARY KEY,
+    role_id CHAR(36) NOT NULL,
+    menu_id CHAR(36) NOT NULL,
+    action_menu_auth MEDIUMTEXT,
+    is_active ENUM('0', '1') NOT NULL DEFAULT '1',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES ms_role (id_role),
+    FOREIGN KEY (menu_id) REFERENCES menu (id_menu)
+);
+
+CREATE TABLE ms_country (
+    id_country CHAR(36) PRIMARY KEY,
+    user_id CHAR(36) NOT NULL,
+    name_country VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES ms_user (id)
+);
+
+CREATE TABLE ms_pharma (
+    id_pharma CHAR(36) PRIMARY KEY,
+    user_id CHAR(36) NOT NULL,
+    country_id CHAR(36) NOT NULL,
+    name_pharma VARCHAR(255) NOT NULL,
+    address_pharma TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES ms_user (id),
+    FOREIGN KEY (country_id) REFERENCES ms_country (id_country)
+);
+
+CREATE TABLE ms_drug_type (
+    id_drug_type CHAR(36) PRIMARY KEY,
+    user_id CHAR(36) NOT NULL,
+    name_drug_type VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES ms_user (id)
+);
+
+CREATE TABLE ms_drug_category (
+    id_drug_category CHAR(36) PRIMARY KEY,
+    user_id CHAR(36) NOT NULL,
+    name_drug_category VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES ms_user (id)
+);
+
+CREATE TABLE ms_drug (
+    id_drug CHAR(36) PRIMARY KEY,
+    user_id CHAR(36) NOT NULL,
+    pharma_id CHAR(36) NOT NULL,
+    drug_type_id CHAR(36) NOT NULL,
+    drug_category_id CHAR(36) NOT NULL,
+    name_drug VARCHAR(255) NOT NULL,
+    qty_drug INT,
+    note_drug VARCHAR(255),
+    avatar_drug VARCHAR(255),
+    avatar_mimetype_drug VARCHAR(50),
+    avatar_originalfile_drug VARCHAR(255),
+    avatar_originalmimetype_drug VARCHAR(50),
+    is_active ENUM('0', '1') NOT NULL DEFAULT '1',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES ms_user (id),
+    FOREIGN KEY (pharma_id) REFERENCES ms_pharma (id_pharma),
+    FOREIGN KEY (drug_type_id) REFERENCES ms_drug_type (id_drug_type),
+    FOREIGN KEY (drug_category_id) REFERENCES ms_drug_category (id_drug_category)
+);
+
+CREATE TABLE tb_storage (
+    id_storage CHAR(36) PRIMARY KEY,
+    user_id CHAR(36) NOT NULL,
+    drug_id CHAR(36) NOT NULL,
+    type_storage ENUM('IN', 'OUT') NOT NULL,
+    qty_storage INT NOT NULL,
+    expired_storage DATE NOT NULL,
+    note_storage VARCHAR(255),
+    is_canceled ENUM('0', '1') NOT NULL DEFAULT '0',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES ms_user (id),
+    FOREIGN KEY (drug_id) REFERENCES ms_drug (id_drug)
+);
+
+// DELETED
+CREATE TABLE tb_expired (
+    id_expired CHAR(36) PRIMARY KEY,
+    storage_id CHAR(36) NOT NULL,
+    qty_expired INT NOT NULL,
+    date_expired DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP,
+    FOREIGN KEY (storage_id) REFERENCES tb_storage (id_storage)
+);
